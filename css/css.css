@@ -219,8 +219,8 @@ body {
     & > div > .event {
         position: absolute;
         padding: 4px;
-        box-sizing: border-box;
         transition: var(--transition);
+        border: none;
         & > div {
             height: 100%;
             background: #0001;
@@ -238,6 +238,7 @@ body {
         border: solid 1px red;
     }
     & > div > div {
+        box-sizing: border-box;
         height: 64px;
         width: 100%;
         border: solid 1px #0001;
