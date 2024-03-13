@@ -267,6 +267,14 @@ body {
     bottom: 16px;
 }
 
+.add {
+    & > textarea {
+        border: none;
+        width: 300px;
+        resize: vertical;
+    }
+}
+
 .todo_dialog {
     & > div > div {
         display: flex;

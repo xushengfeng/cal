@@ -228,14 +228,24 @@ function setPointer() {
     }
 }
 
+function date2iso(date: Date) {
+    return date?.toISOString()?.replace(/:\d{2}\.\d{3}Z/, "");
+}
+
 async function add(id: string) {
     const oldE = await getEvent(id);
     const title = oldE ? "更改" : "新增";
-    const dialog = el("dialog") as HTMLDialogElement;
-    const name = el("input", { value: oldE?.name || "" });
-    const startDate = el("input", { value: oldE?.start || "" });
-    const endDate = el("input", { value: oldE?.end || "" });
-    const note = el("textarea", { value: oldE?.note || "" });
+    const dialog = el("dialog", { class: "add" }) as HTMLDialogElement;
+    const name = el("input", { placeholder: "日程标题", value: oldE?.name || "" });
+    const startDate = el("input", {
+        value: date2iso(oldE?.start) || "",
+        type: "datetime-local",
+    });
+    const endDate = el("input", {
+        value: date2iso(oldE?.end) || "",
+        type: "datetime-local",
+    });
+    const note = el("textarea", { placeholder: "备注", value: oldE?.note || "" });
     const ok = el(
         "button",
         {
@@ -281,7 +291,19 @@ async function add(id: string) {
         },
         iconEl(clear_svg)
     );
-    dialog.append(el("h1", title), name, startDate, endDate, note, close, ok);
+    dialog.append(
+        el("h1", title),
+        name,
+        el("br"),
+        el("label", "开始时间", startDate),
+        el("br"),
+        el("label", "结束时间", endDate),
+        el("br"),
+        note,
+        el("br"),
+        close,
+        ok
+    );
     if (oldE) close.before(rmEl);
     dialogX(dialog);
 }
