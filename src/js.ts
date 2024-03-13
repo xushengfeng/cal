@@ -204,7 +204,8 @@ async function setTimeLine(centerDate: Date, partLen: number) {
 function setPointer() {
     const now = new Date();
     let todayEl = timeLine.querySelector(`[data-date="${dateStr(now)}"]`);
-    const top = (now.getTime() - new Date(dateStr(now)).getTime()) / dayTime;
+    const deltaT = now.getTime() - new Date(dateStr(now)).getTime();
+    const top = deltaT / dayTime;
     if (todayEl) {
         let pointer = todayEl.querySelector(".pointer") as HTMLElement;
         if (!pointer) {
@@ -212,6 +213,10 @@ function setPointer() {
             todayEl.append(pointer);
         }
         pointer.style.top = top * 100 + "%";
+        if (dayTime - deltaT < 2000)
+            setTimeout(() => {
+                pointer?.remove();
+            }, 2000);
     }
 }
 
