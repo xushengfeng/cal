@@ -249,3 +249,27 @@ body {
     right: 16px;
     bottom: 16px;
 }
+
+.todo_dialog {
+    & > div > div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        & > label {
+            & > input {
+                display: none;
+            }
+            &:not(:has(input:checked)) > .icon {
+                opacity: 0;
+            }
+            & > .icon {
+                width: 16px;
+                height: 16px;
+            }
+            display: block;
+            position: relative;
+            width: 16px;
+            height: 16px;
+        }
+    }
+}

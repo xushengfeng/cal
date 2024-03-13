@@ -12,6 +12,7 @@ import ok_svg from "../assets/icons/ok.svg";
 import todo_svg from "../assets/icons/todo.svg";
 import close_svg from "../assets/icons/close.svg";
 import add_svg from "../assets/icons/add.svg";
+import fixed_svg from "../assets/icons/fixed.svg";
 
 function icon(src: string) {
     return `<img src="${src}" class="icon">`;
@@ -256,30 +257,40 @@ async function add(id: string) {
 }
 
 function todo() {
-    const dialog = el("dialog") as HTMLDialogElement;
+    const dialog = el("dialog", { class: "todo_dialog" }) as HTMLDialogElement;
     const div = el("div");
     for (let i of todos.toReversed()) {
+        const fixedEl = el("input", { type: "checkbox", checked: i.fixed });
         div.append(
-            el(
-                "p",
-                {
-                    onclick: async () => {
-                        dialog.close();
-                        const event = structuredClone(i.event);
-                        event.start = new Date();
-                        if (!event.end) {
-                            event.end = new Date(new Date().getTime() + 1000 * 60 * 5);
-                        }
-                        await setEvent(uuid(), event);
-                        setTimeLine(new Date(), 3);
-                        if (!i.fixed) {
-                            todos = todos.filter((e) => e !== i);
+            el("div", [
+                el(
+                    "span",
+                    {
+                        onclick: async () => {
+                            dialog.close();
+                            const event = structuredClone(i.event);
+                            event.start = new Date();
+                            if (!event.end) {
+                                event.end = new Date(new Date().getTime() + 1000 * 60 * 5);
+                            }
+                            await setEvent(uuid(), event);
+                            setTimeLine(new Date(), 3);
+                            if (!i.fixed) {
+                                todos = todos.filter((e) => e !== i);
+                                writeTodos();
+                            }
+                        },
+                        oncontextmenu: (e) => {
+                            e.preventDefault();
+                            fixedEl.checked = !fixedEl.checked;
+                            i.fixed = fixedEl.checked;
                             writeTodos();
-                        }
+                        },
                     },
-                },
-                i.event.name
-            )
+                    i.event.name
+                ),
+                el("label", fixedEl, iconEl(fixed_svg)),
+            ])
         );
     }
     if (!todos.length) div.append(el("p", "没有代办"));
