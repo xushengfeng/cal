@@ -47,19 +47,60 @@ var setting = localforage.createInstance({
     driver: localforage.LOCALSTORAGE,
 });
 
+var events = localforage.createInstance({
+    name: "event",
+    storeName: "events",
+});
+
+var eventV = localforage.createInstance({
+    name: "event",
+    storeName: "v",
+});
+
 type Event = {
-    id: string;
     start: Date;
     end: Date;
     name: string;
     note: string;
 };
 
-let todos: { event: Event; fixed?: boolean }[] = [];
+let todos: { event: Event; fixed?: boolean }[] = (await eventV.getItem("todos")) || [];
 
-let events: Event[] = [
-    { id: "", name: "test", note: "", start: new Date("2024-3-13 12:00"), end: new Date("2024-3-13 14:00") },
-];
+function writeTodos() {
+    eventV.setItem("todos", todos);
+}
+
+let day2events: { [key: string]: string[] } = (await eventV.getItem("day2events")) || {};
+
+function writeD2E() {
+    eventV.setItem("day2events", day2events);
+}
+
+function getDateRangeStr(from: Date, to: Date) {
+    const l: Date[] = [];
+    let d = from;
+    while (d.getTime() < to.getTime()) {
+        l.push(d);
+        d = new Date(d.getTime() + dayTime);
+    }
+    if (dateStr(l.at(-1)) != dateStr(to)) l.push(to);
+    return l.map((d) => dateStr(d));
+}
+
+async function getEvent(id: string) {
+    return (await events.getItem(id)) as Event;
+}
+
+async function setEvent(id: string, event: Event) {
+    const oldE = await getEvent(id);
+    if (oldE) getDateRangeStr(oldE.start, oldE.end).map((s) => (day2events[s] = day2events[s].filter((e) => e != id)));
+    await events.setItem(id, event);
+    getDateRangeStr(event.start, event.end).map((s) => {
+        if (!day2events[s]) day2events[s] = [];
+        if (!day2events[s].includes(id)) day2events[s].push(id);
+        writeD2E();
+    });
+}
 
 /************************************UI */
 function dialogX(el: HTMLDialogElement) {
@@ -83,15 +124,16 @@ function dateStr(date: Date) {
 
 const dayTime = 24 * 60 * 60 * 1000;
 
-const dayEl2 = (date: Date) => {
+const dayEl2 = async (date: Date) => {
     const div = el("div", { "data-date": dateStr(date) });
     for (let i = 0; i < 24; i++) {
         div.append(el("div"));
     }
     const start = new Date(dateStr(date));
     const end = new Date(start.getTime() + dayTime);
-    const es = events.filter((e) => !(e.end.getTime() <= start.getTime() || end.getTime() <= e.start.getTime()));
-    es.forEach((e) => {
+    const eventsId = day2events?.[dateStr(date)] || [];
+    for (let id of eventsId) {
+        const e = await getEvent(id);
         let eStart = e.start;
         let eEnd = e.end;
         if (eStart.getTime() < start.getTime()) {
@@ -103,11 +145,18 @@ const dayEl2 = (date: Date) => {
         let top = (eStart.getTime() - start.getTime()) / dayTime;
         let height = (eEnd.getTime() - eStart.getTime()) / dayTime;
         div.append(
-            el("div", { class: "event", style: { height: `${height * 100}%`, top: top * 100 + "%" } }, [
-                el("div", e.name),
-            ])
+            el(
+                "div",
+                {
+                    class: "event",
+                    style: { height: `${height * 100}%`, top: top * 100 + "%" },
+                    "data-id": id,
+                    onclick: () => add(id),
+                },
+                [el("div", e.name)]
+            )
         );
-    });
+    }
     return div;
 };
 
@@ -135,11 +184,11 @@ function setCalView(type: "") {
     cal.append(daysView(new Date(), 2));
 }
 
-function setTimeLine(centerDate: Date, partLen: number) {
+async function setTimeLine(centerDate: Date, partLen: number) {
     const timeList = timeRange(centerDate, partLen);
     const div = el("div");
     for (let d of timeList) {
-        div.append(dayEl2(d));
+        div.append(await dayEl2(d));
     }
 
     timeLine.innerHTML = "";
@@ -160,19 +209,20 @@ function setPointer() {
     }
 }
 
-function add() {
+async function add(id: string) {
+    const oldE = await getEvent(id);
+    const title = oldE ? "更改" : "新增";
     const dialog = el("dialog") as HTMLDialogElement;
-    const name = el("input");
-    const startDate = el("input");
-    const endDate = el("input");
-    const note = el("textarea");
+    const name = el("input", { value: oldE?.name || "" });
+    const startDate = el("input", { value: oldE?.start || "" });
+    const endDate = el("input", { value: oldE?.end || "" });
+    const note = el("textarea", { value: oldE?.note || "" });
     const ok = el(
         "button",
         {
-            onclick: () => {
+            onclick: async () => {
                 dialog.close();
                 let event: Event = {
-                    id: uuid(),
                     name: name.value,
                     start: startDate.value ? new Date(startDate.value) : null,
                     end: endDate.value ? new Date(endDate.value) : null,
@@ -180,11 +230,12 @@ function add() {
                 };
                 if (!startDate.value) {
                     todos.push({ event });
+                    writeTodos();
                 } else {
                     if (!endDate.value) {
                         event.end = new Date(new Date(startDate.value).getTime() + 1000 * 60 * 5);
                     }
-                    events.push(event);
+                    await setEvent(id, event);
                     setTimeLine(new Date(), 3);
                 }
             },
@@ -200,7 +251,7 @@ function add() {
         },
         iconEl(close_svg)
     );
-    dialog.append(el("h1", "添加"), name, startDate, endDate, note, close, ok);
+    dialog.append(el("h1", title), name, startDate, endDate, note, close, ok);
     dialogX(dialog);
 }
 
@@ -212,17 +263,18 @@ function todo() {
             el(
                 "p",
                 {
-                    onclick: () => {
+                    onclick: async () => {
                         dialog.close();
                         const event = structuredClone(i.event);
                         event.start = new Date();
                         if (!event.end) {
                             event.end = new Date(new Date().getTime() + 1000 * 60 * 5);
                         }
-                        events.push(event);
+                        await setEvent(uuid(), event);
                         setTimeLine(new Date(), 3);
                         if (!i.fixed) {
                             todos = todos.filter((e) => e !== i);
+                            writeTodos();
                         }
                     },
                 },
@@ -239,7 +291,7 @@ document.body.append(cal, timeLine);
 document.body.append(
     el("div", { class: "button_bar" }, [
         el("button", { onclick: todo }, iconEl(todo_svg)),
-        el("button", { onclick: add }, iconEl(add_svg)),
+        el("button", { onclick: () => add(uuid()) }, iconEl(add_svg)),
     ])
 );
 

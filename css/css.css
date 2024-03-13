@@ -196,12 +196,16 @@ body {
     height: 32px;
 }
 
+.cal {
+    background: var(--bg);
+}
 .cal > div {
     display: flex;
     flex-wrap: wrap;
 }
 
 .timeline {
+    background: var(--bg);
     overflow-y: scroll;
     height: calc(100vh - 32px);
 }
