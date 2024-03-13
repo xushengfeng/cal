@@ -12,6 +12,7 @@ import ok_svg from "../assets/icons/ok.svg";
 import todo_svg from "../assets/icons/todo.svg";
 import close_svg from "../assets/icons/close.svg";
 import add_svg from "../assets/icons/add.svg";
+import clear_svg from "../assets/icons/clear.svg";
 import fixed_svg from "../assets/icons/fixed.svg";
 
 function icon(src: string) {
@@ -101,6 +102,13 @@ async function setEvent(id: string, event: Event) {
         if (!day2events[s].includes(id)) day2events[s].push(id);
         writeD2E();
     });
+}
+
+async function rmEvent(id: string) {
+    const oldE = await getEvent(id);
+    if (oldE) getDateRangeStr(oldE.start, oldE.end).map((s) => (day2events[s] = day2events[s].filter((e) => e != id)));
+    await events.removeItem(id);
+    writeD2E();
 }
 
 /************************************UI */
@@ -262,7 +270,19 @@ async function add(id: string) {
         },
         iconEl(close_svg)
     );
+    const rmEl = el(
+        "button",
+        {
+            onclick: async () => {
+                dialog.close();
+                await rmEvent(id);
+                setTimeLine(new Date(), 3);
+            },
+        },
+        iconEl(clear_svg)
+    );
     dialog.append(el("h1", title), name, startDate, endDate, note, close, ok);
+    if (oldE) close.before(rmEl);
     dialogX(dialog);
 }
 
