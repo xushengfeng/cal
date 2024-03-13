@@ -187,12 +187,17 @@ function setCalView(type: "") {
 
 async function setTimeLine(centerDate: Date, partLen: number) {
     const timeList = timeRange(centerDate, partLen);
-    const div = el("div");
+    const div = el("div", { class: "timeline_main" });
+    const text = el("div", { class: "timeline_text" });
+    for (let i = 0; i <= 24; i++) {
+        text.append(el("div", el("span", i)));
+    }
     for (let d of timeList) {
         div.append(await dayEl2(d));
     }
 
     timeLine.innerHTML = "";
+    timeLine.append(text);
     timeLine.append(div);
 }
 

@@ -208,11 +208,27 @@ body {
     background: var(--bg);
     overflow-y: scroll;
     height: calc(100vh - 32px);
-}
-.timeline > div {
     display: flex;
+}
+.timeline > .timeline_text {
+    display: flex;
+    flex-direction: column;
+
+    & > div {
+        box-sizing: border-box;
+        min-height: 64px;
+        & > span {
+            position: relative;
+            top: -0.4em;
+        }
+    }
+}
+.timeline > .timeline_main {
+    display: flex;
+    flex-grow: 1;
     & > div {
         width: 100%;
+        height: max-content;
         position: relative;
     }
 
