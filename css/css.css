@@ -1,0 +1,247 @@
+@font-face {
+    font-family: "Noto Color Emoji";
+    src: url(../assets/NotoColorEmoji.ttf);
+}
+
+:root {
+    --bg: #fff;
+    --bg1: #fff9;
+    --blur: blur(10px);
+    --hover-color: #dfdfdf;
+    --box-shadow: 0 0 4px #0002;
+    --transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    --border-radius: 8px;
+    --height: 40px;
+    --color: #000;
+    --font-size: 16px;
+    --main-bar-size: 24px;
+    --icon-color: none;
+    --icon-color1: invert(1);
+    --b-button: 32px;
+    --o-padding: 8px;
+    --font-size: 16px;
+    --font-family: serif;
+    --size0: 32px;
+}
+
+:root[data-theme="dark"] {
+    --bg: #000;
+    --bg1: #000a;
+    --color: #cacaca;
+    --hover-color: #303030;
+    --box-shadow: 0 0 4px #fff7;
+    & .icon {
+        filter: invert(0.78);
+    }
+}
+:root[data-theme="classical"] {
+    --bg: #eceae6;
+    --bg1: #eceae6aa;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] {
+        --bg: #000;
+        --bg1: #000a;
+        --color: #cacaca;
+        --hover-color: #303030;
+        --box-shadow: 0 0 4px #fff7;
+        & .icon {
+            filter: invert(0.78);
+        }
+    }
+    ::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background: #444;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+    kbd {
+        box-shadow: 0 5px #fff4;
+        background: linear-gradient(315deg, #191919, #000);
+    }
+}
+
+html,
+body {
+    margin: 0;
+    font-family: sans-serif;
+    color: var(--color);
+}
+
+.icon {
+    position: absolute;
+    pointer-events: none;
+    left: 0;
+    top: 0;
+    filter: var(--icon-color);
+    user-select: none;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #ddd;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #ccc;
+}
+::-webkit-scrollbar-track {
+    background: #0000;
+}
+::-webkit-scrollbar-button {
+    height: 8px;
+    width: 8px;
+    background-color: #0000;
+}
+::-webkit-scrollbar-corner {
+    background-color: #0000;
+}
+
+button {
+    outline: none;
+    color: var(--color);
+    font-family: var(--main-font);
+    border-radius: var(--border-radius);
+    background-color: var(--bg);
+    height: var(--height);
+    border: none;
+    margin: 0px;
+    padding: 0;
+    transition: var(--transition);
+    width: var(--b-button);
+    height: var(--b-button);
+    position: relative;
+}
+button:hover {
+    background-color: var(--hover-color);
+}
+button > .icon {
+    width: var(--b-button);
+}
+
+input {
+    outline: none;
+    background-color: #0000;
+    color: var(--color);
+    border: none;
+    border-bottom: 1px solid var(--color);
+}
+
+select {
+    outline: none;
+    border-radius: var(--border-radius);
+    background-color: var(--bg);
+    height: var(--height);
+    border: none;
+    outline: none;
+    margin: 0px;
+    color: var(--color);
+    padding: 0 var(--o-padding) 0 var(--o-padding);
+    transition: var(--transition);
+    user-select: none;
+}
+
+select:hover {
+    background-color: var(--hover-color);
+}
+option {
+    background-color: var(--bg);
+}
+textarea {
+    outline: none;
+    background-color: #0000;
+    color: var(--color);
+}
+
+[popover],
+dialog {
+    color: var(--color);
+    background-color: var(--bg1);
+    backdrop-filter: var(--blur);
+    border: 1px solid var(--color);
+    padding: 1rem;
+    border-radius: 1rem;
+    outline: none;
+}
+[popover] {
+    border: 1px solid var(--color);
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+html,
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+:is(div, button):has(> .icon) {
+    height: var(--size0);
+    width: var(--size0);
+    position: relative;
+}
+:is(div, button) > .icon {
+    height: var(--size0);
+    width: var(--size0);
+}
+
+.day {
+    width: 32px;
+    height: 32px;
+}
+
+.cal > div {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.timeline {
+    overflow-y: scroll;
+    height: calc(100vh - 32px);
+}
+.timeline > div {
+    display: flex;
+    & > div {
+        width: 100%;
+        position: relative;
+    }
+
+    & > div > .event {
+        position: absolute;
+        padding: 4px;
+        box-sizing: border-box;
+        transition: var(--transition);
+        & > div {
+            height: 100%;
+            background: #0001;
+            border-radius: 4px;
+            box-sizing: border-box;
+            padding: 4px;
+        }
+        &:hover {
+            padding: 0;
+        }
+    }
+    & > div > .pointer {
+        position: absolute;
+        height: 1px;
+        border: solid 1px red;
+    }
+    & > div > div {
+        height: 64px;
+        width: 100%;
+        border: solid 1px #0001;
+    }
+}
+
+.button_bar {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+}
