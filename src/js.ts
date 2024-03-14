@@ -82,6 +82,19 @@ function writeD2E() {
     eventV.setItem("day2events", day2events);
 }
 
+const submit: {
+    title: string;
+    url: string;
+    user?: string;
+    passwd?: string;
+    uuid: string;
+    lastSync: number;
+    feq: number;
+}[] = (await setting.getItem("calendars")) || [];
+var subCalendar = localforage.createInstance({
+    name: "calendar",
+});
+
 function getDateRangeStr(from: Date, to: Date) {
     const l: Date[] = [];
     let d = from;
@@ -113,6 +126,38 @@ async function rmEvent(id: string) {
     if (oldE) getDateRangeStr(oldE.start, oldE.end).map((s) => (day2events[s] = day2events[s].filter((e) => e != id)));
     await events.removeItem(id);
     writeD2E();
+}
+
+function icsParser(ics: string) {
+    let l = ics.trim().split("\n");
+    let root: { keys: string[]; value: string | typeof root }[] = [];
+    let depthL: { keys: string[]; value: string | typeof root }[][] = [];
+
+    let nl: string[] = [];
+    for (let i of l) {
+        if (i.startsWith(" ")) nl.with(-1, nl.at(-1) + i.trim());
+        else nl.push(i);
+    }
+
+    function get(str: string) {
+        let l = str.split(":");
+        let keys = l[0].split(";");
+        return { keys, value: l.slice(1).join(":") };
+    }
+
+    for (let i of nl) {
+        if (i.startsWith("BEGIN:")) {
+            depthL.push([]);
+            depthL.at(-1).push(get(i));
+        } else if (i.startsWith("END:")) {
+            depthL.at(-2)?.push({ keys: [depthL.at(-1)[0].value as string], value: depthL.at(-1).slice(1) });
+            if (depthL.length > 1) depthL.pop();
+        } else {
+            let l = depthL.at(-1);
+            l.push(get(i));
+        }
+    }
+    return depthL[0];
 }
 
 /************************************UI */
