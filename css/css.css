@@ -229,6 +229,9 @@ body {
 
 .day_view {
     justify-content: space-around;
+    & > div {
+        display: flex;
+    }
 }
 
 .month_view {
@@ -261,10 +264,17 @@ body {
     gap: 16px;
     height: calc(100dvh - 3rem);
     overflow-y: scroll;
+    & > div > div {
+        gap: 0;
+        & > div {
+            font-size: min(16px, (100dvw - 16px * 3) / 21 / 1.8);
+        }
+    }
     & .day {
-        width: min(32px, (100dvw - 16px * 3) / 21);
-        height: min(32px, (100dvw - 16px * 3) / 21);
-        font-size: min(16px, (100dvw - 16px * 3) / 21 / 1.8);
+        width: min(40px, (100dvw - 16px * 3) / 21);
+        height: min(40px, (100dvw - 16px * 3) / 21);
+        display: flex;
+        justify-content: center;
     }
 }
 ::view-transition-group(*) {
