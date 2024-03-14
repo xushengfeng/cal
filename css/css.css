@@ -356,8 +356,11 @@ body {
 .todo_dialog {
     & > div > div {
         display: flex;
-        justify-content: space-between;
+        user-select: none;
         align-items: center;
+        & > :first-child {
+            flex-grow: 1;
+        }
         & > label {
             & > input {
                 display: none;
@@ -371,7 +374,7 @@ body {
             }
             display: block;
             position: relative;
-            width: 16px;
+            min-width: 16px;
             height: 16px;
         }
     }

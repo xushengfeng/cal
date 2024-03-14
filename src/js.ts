@@ -624,6 +624,13 @@ function todo() {
     }
     if (!todos.length) div.append(el("p", "没有代办"));
     dialog.append(el("h1", "代办"), div);
+    dialog.append(
+        el("button", iconEl(close_svg), {
+            onclick: () => {
+                dialog.close();
+            },
+        })
+    );
     dialogX(dialog);
 }
 
