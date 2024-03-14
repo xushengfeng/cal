@@ -190,6 +190,7 @@ body {
     & > .title {
         font-size: 2rem;
         flex-grow: 1;
+        padding-left: 0.5em;
     }
     & > .view_popover {
         margin: 0;
@@ -340,28 +341,33 @@ body {
 }
 
 .todo_dialog {
-    & > div > div {
-        display: flex;
-        user-select: none;
-        align-items: center;
-        & > :first-child {
-            flex-grow: 1;
-        }
-        & > label {
-            & > input {
-                display: none;
+    & > div {
+        width: 300px;
+        max-height: 400px;
+        overflow: scroll;
+        & > div {
+            display: flex;
+            user-select: none;
+            align-items: center;
+            & > :first-child {
+                flex-grow: 1;
             }
-            &:not(:has(input:checked)) > .icon {
-                opacity: 0;
-            }
-            & > .icon {
-                width: 16px;
+            & > label {
+                & > input {
+                    display: none;
+                }
+                &:not(:has(input:checked)) > .icon {
+                    opacity: 0;
+                }
+                & > .icon {
+                    width: 16px;
+                    height: 16px;
+                }
+                display: block;
+                position: relative;
+                min-width: 16px;
                 height: 16px;
             }
-            display: block;
-            position: relative;
-            min-width: 16px;
-            height: 16px;
         }
     }
 }
