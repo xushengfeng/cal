@@ -51,6 +51,8 @@ var setting = localforage.createInstance({
     driver: localforage.LOCALSTORAGE,
 });
 
+const CALENDARTYPE = "calendar.type";
+
 const lan = navigator.language;
 
 var events = localforage.createInstance({
@@ -91,7 +93,7 @@ const submit: {
     uuid: string;
     lastSync: number;
     feq: number;
-}[] = (await setting.getItem("calendars")) || [];
+}[] = (await setting.getItem("calendar.calendars")) || [];
 var subCalendar = localforage.createInstance({
     name: "calendar",
     storeName: "calendars",
@@ -383,6 +385,7 @@ function yearView(date: Date) {
 const titleEl = el("div", { class: "title" });
 
 function setCalView(type: "5" | "month" | "year") {
+    setting.setItem(CALENDARTYPE, type);
     // @ts-ignore
     if (!document.startViewTransition) {
         run();
@@ -719,7 +722,7 @@ document.body.append(
 
 let selectDate = new Date();
 
-setCalView("month");
+setCalView((await setting.getItem(CALENDARTYPE)) || "month");
 setTimeLine(selectDate, 2);
 
 setPointer();
