@@ -607,7 +607,16 @@ async function add(id: string) {
         el("br"),
         el("label", "持续时间", duration),
         el("br"),
-        el("label", "结束时间", endDate),
+        el(
+            "label",
+            "结束时间",
+            endDate,
+            el("button", "现在", {
+                onclick: () => {
+                    endDate.value = date2str(new Date());
+                },
+            })
+        ),
         el("br"),
         note,
         el("br"),
