@@ -190,9 +190,14 @@ function timeRange(centerDate: Date, partLen: number) {
 
 function daysView(centerDate: Date, partLen: number) {
     const timeList = timeRange(centerDate, partLen);
-    const div = el("div");
+    const div = el("div", { class: "day_view" });
     for (let d of timeList) {
-        div.append(dayEl(d));
+        div.append(
+            dayEl(d),
+            new Intl.DateTimeFormat(lan, {
+                weekday: "short",
+            }).format(d)
+        );
     }
     return div;
 }

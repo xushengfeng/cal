@@ -221,6 +221,10 @@ body {
     flex-wrap: wrap;
 }
 
+.day_view {
+    justify-content: space-around;
+}
+
 .month_view {
     display: grid !important;
     grid-template-columns: repeat(7, 1fr);
