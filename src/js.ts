@@ -282,7 +282,7 @@ function daysView(centerDate: Date, partLen: number) {
                     onclick: () => {
                         selectDate = d;
                         setCalView("5");
-                        setTimeLine(selectDate, 2);
+                        setTimeLine(selectDate, timeWidth);
                     },
                 }
             )
@@ -373,7 +373,7 @@ function monthView(year: number, month: number, isYear?: boolean) {
                     setStyle(el, { "view-transition-name": el.getAttribute("view-transition-name") });
                 });
             }
-            setTimeLine(selectDate, 2);
+            setTimeLine(selectDate, timeWidth);
         };
         div.append(el("span", i.getDate()));
         if (!isYear) div.append(el("span", getOtherDay(i, "zh-CN-u-ca-chinese")));
@@ -410,6 +410,8 @@ function yearView(date: Date) {
 
 const titleEl = el("div", { class: "title" });
 
+let timeWidth = 2;
+
 function setCalView(type: "5" | "month" | "year") {
     setting.setItem(CALENDARTYPE, type);
     // @ts-ignore
@@ -426,7 +428,7 @@ function setCalView(type: "5" | "month" | "year") {
         cal.innerHTML = "";
         let title = "";
         if (type === "5") {
-            cal.append(daysView(selectDate, 2));
+            cal.append(daysView(selectDate, timeWidth));
             title = new Intl.DateTimeFormat(lan, {
                 year: "numeric",
                 month: "long",
@@ -555,7 +557,7 @@ async function add(id: string) {
                         event.end = new Date(new Date(startDate.value).getTime() + 1000 * 60 * 5);
                     }
                     await setEvent(id, event);
-                    setTimeLine(new Date(startDate.value), 3);
+                    setTimeLine(new Date(startDate.value), timeWidth);
                 }
             },
         },
@@ -576,7 +578,7 @@ async function add(id: string) {
             onclick: async () => {
                 dialog.close();
                 await rmEvent(id);
-                setTimeLine(selectDate, 3);
+                setTimeLine(selectDate, timeWidth);
             },
         },
         iconEl(clear_svg)
@@ -627,7 +629,7 @@ function todo() {
                                 event.end = new Date(selectDate.getTime() + (event.duration || 1000 * 60 * 5));
                             }
                             await setEvent(uuid(), event);
-                            setTimeLine(selectDate, 3);
+                            setTimeLine(selectDate, timeWidth);
                             if (!i.fixed) {
                                 todos = todos.filter((e) => e !== i);
                                 writeTodos();
@@ -749,7 +751,7 @@ document.body.append(
 let selectDate = new Date();
 
 setCalView((await setting.getItem(CALENDARTYPE)) || "month");
-setTimeLine(selectDate, 2);
+setTimeLine(selectDate, timeWidth);
 
 setPointer();
 
