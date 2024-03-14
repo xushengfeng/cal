@@ -643,6 +643,9 @@ function todo() {
                             dialog.close();
                             const event = structuredClone(i.event);
                             event.start = selectDate;
+                            event.start.setHours(new Date().getHours());
+                            event.start.setMinutes(new Date().getMinutes());
+                            event.start.setSeconds(0);
                             if (!event.end) {
                                 event.end = new Date(selectDate.getTime() + (event.duration || 1000 * 60 * 5));
                             }
