@@ -24,23 +24,8 @@
     --size0: 32px;
 }
 
-:root[data-theme="dark"] {
-    --bg: #000;
-    --bg1: #000a;
-    --color: #cacaca;
-    --hover-color: #303030;
-    --box-shadow: 0 0 4px #fff7;
-    & .icon {
-        filter: invert(0.78);
-    }
-}
-:root[data-theme="classical"] {
-    --bg: #eceae6;
-    --bg1: #eceae6aa;
-}
-
 @media (prefers-color-scheme: dark) {
-    :root[data-theme="auto"] {
+    :root {
         --bg: #000;
         --bg1: #000a;
         --color: #cacaca;
@@ -68,6 +53,7 @@ body {
     margin: 0;
     font-family: sans-serif;
     color: var(--color);
+    background: var(--bg);
 }
 
 body {
@@ -250,12 +236,12 @@ body {
         }
     }
     & .calendar_today {
-        border: #000 solid 1px;
+        border: var(--color) solid 1px;
         background: var(--color);
         color: var(--bg);
     }
     & .calendar_select {
-        border: #000 solid 1px;
+        border: var(--color) solid 1px;
     }
 }
 .year_view {
@@ -316,7 +302,7 @@ body {
         border: none;
         & > div {
             height: 100%;
-            background: #0001;
+            background: color-mix(in srgb, var(--color) 10%, transparent);
             border-radius: 4px;
             box-sizing: border-box;
             padding: 4px;
@@ -334,7 +320,7 @@ body {
         box-sizing: border-box;
         height: 64px;
         width: 100%;
-        border: solid 1px #0001;
+        border: solid 1px color-mix(in srgb, var(--color) 10%, transparent);
     }
 }
 
