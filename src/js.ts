@@ -133,8 +133,8 @@ const dayEl = (date: Date) => {
 function dateStr(date: Date) {
     return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }
-function dateStr2(date: Date) {
-    return `a${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, "0")}${date
+function dateStr2(date: Date, mark?: string) {
+    return `${mark || "a"}${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, "0")}${date
         .getDate()
         .toString()
         .padStart(2, "0")}`;
@@ -143,7 +143,7 @@ function dateStr2(date: Date) {
 const dayTime = 24 * 60 * 60 * 1000;
 
 const dayEl2 = async (date: Date) => {
-    const div = el("div", { "data-date": dateStr(date) });
+    const div = el("div", { "data-date": dateStr(date), style: { "view-transition-name": dateStr2(date, "b") } });
     for (let i = 0; i < 24; i++) {
         div.append(el("div"));
     }
@@ -212,7 +212,7 @@ function daysView(centerDate: Date, partLen: number) {
     return div;
 }
 
-function monthView(year: number, month: number, date: number) {
+function monthView(year: number, month: number, isYear?: boolean) {
     const today = new Date();
     let dateList: Date[] = [];
     let nowDate = new Date(year, month, 1);
@@ -253,6 +253,10 @@ function monthView(year: number, month: number, date: number) {
             selectDate = i;
             cal.querySelector(".calendar_select").classList.remove("calendar_select");
             div.classList.add("calendar_select");
+            if (!isYear) {
+                // @ts-ignore
+                document?.startViewTransition();
+            }
             setTimeLine(selectDate, 2);
         };
         div.innerText = `${i.getDate()}`;
@@ -281,7 +285,7 @@ function yearView(date: Date) {
         const title = new Intl.DateTimeFormat(lan, {
             month: "long",
         }).format(new Date(`${year}-${m + 1}-1`));
-        div.append(el("div", el("h2", title), monthView(year, m, 1)));
+        div.append(el("div", el("h2", title), monthView(year, m, true)));
     }
     return div;
 }
@@ -310,7 +314,7 @@ function setCalView(type: "5" | "month" | "year") {
             }).format(selectDate);
         }
         if (type === "month") {
-            cal.append(monthView(selectDate.getFullYear(), selectDate.getMonth(), 1));
+            cal.append(monthView(selectDate.getFullYear(), selectDate.getMonth()));
             title = new Intl.DateTimeFormat(lan, {
                 year: "numeric",
                 month: "long",
