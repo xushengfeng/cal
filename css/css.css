@@ -191,9 +191,26 @@ body {
     width: var(--size0);
 }
 
+.top_bar {
+    background: var(--bg);
+    display: flex;
+    height: 3rem;
+    & > .title {
+        font-size: 2rem;
+        flex-grow: 1;
+    }
+    & > .view_popover {
+        margin: 0;
+        right: 32px;
+        top: 32px;
+        left: auto;
+    }
+}
+
 .day {
     width: 32px;
     height: 32px;
+    text-align: center;
 }
 
 .cal {
@@ -204,11 +221,43 @@ body {
     flex-wrap: wrap;
 }
 
+.month_view {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr);
+    justify-items: center;
+    & div {
+        box-sizing: border-box;
+        border-radius: 4px;
+    }
+    & :not(.calendar_month) {
+        opacity: 0.4;
+    }
+    & .calendar_today {
+        border: #000 solid 1px;
+    }
+}
+.year_view {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    height: calc(100dvh - 3rem);
+    overflow-y: scroll;
+    & .day {
+        width: min(32px, (100dvw - 16px * 3) / 21);
+        height: min(32px, (100dvw - 16px * 3) / 21);
+        font-size: min(16px, (100dvw - 16px * 3) / 21 / 1.8);
+    }
+}
+::view-transition-group(*) {
+    animation-duration: 0.5s;
+}
+
 .timeline {
     background: var(--bg);
     overflow-y: scroll;
     height: calc(100vh - 32px);
     display: flex;
+    view-transition-name: timeline;
 }
 .timeline > .timeline_text {
     display: flex;
@@ -265,6 +314,7 @@ body {
     position: fixed;
     right: 16px;
     bottom: 16px;
+    view-transition-name: bar;
 }
 
 .add {

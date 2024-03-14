@@ -14,6 +14,7 @@ import close_svg from "../assets/icons/close.svg";
 import add_svg from "../assets/icons/add.svg";
 import clear_svg from "../assets/icons/clear.svg";
 import fixed_svg from "../assets/icons/fixed.svg";
+import view_svg from "../assets/icons/view.svg";
 
 function icon(src: string) {
     return `<img src="${src}" class="icon">`;
@@ -48,6 +49,8 @@ var setting = localforage.createInstance({
     name: "setting",
     driver: localforage.LOCALSTORAGE,
 });
+
+const lan = navigator.language;
 
 var events = localforage.createInstance({
     name: "event",
@@ -124,11 +127,17 @@ const cal = el("div", { class: "cal" });
 const timeLine = el("div", { class: "timeline" });
 
 const dayEl = (date: Date) => {
-    return el("div", { class: "day" }, [date.getDate()]);
+    return el("div", { class: "day", style: { "view-transition-name": dateStr2(date) } }, [date.getDate()]);
 };
 
 function dateStr(date: Date) {
     return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+}
+function dateStr2(date: Date) {
+    return `a${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, "0")}${date
+        .getDate()
+        .toString()
+        .padStart(2, "0")}`;
 }
 
 const dayTime = 24 * 60 * 60 * 1000;
@@ -188,9 +197,103 @@ function daysView(centerDate: Date, partLen: number) {
     return div;
 }
 
-function setCalView(type: "") {
-    cal.innerHTML = "";
-    cal.append(daysView(new Date(), 2));
+function monthView(year: number, month: number, date: number) {
+    const today = new Date();
+    let dateList: Date[] = [];
+    let nowDate = new Date(year, month, 1);
+    while (nowDate.getDay() != 0) {
+        nowDate = new Date(nowDate.getTime() - dayTime);
+        dateList.unshift(nowDate);
+    }
+    nowDate = new Date(year, month, 1);
+    while (nowDate.getMonth() === month) {
+        dateList.push(nowDate);
+        nowDate = new Date(nowDate.getTime() + dayTime);
+    }
+    nowDate = new Date(year, month, dateList[dateList.length - 1].getDate());
+    while (nowDate.getDay() != 6) {
+        nowDate = new Date(nowDate.getTime() + dayTime);
+        dateList.push(nowDate);
+    }
+    let pel = el("div", { class: "month_view", style: { "view-transition-name": `a${year}${month}` } });
+    let dayList = ["日", "一", "二", "三", "四", "五", "六"];
+    for (let i of dayList) {
+        let div = el("div");
+        div.innerText = `${i}`;
+        div.classList.add("calendar_week");
+        pel.append(div);
+    }
+    for (let i of dateList) {
+        let div = el("div", { class: "day" });
+        div.innerText = `${i.getDate()}`;
+        if (i.getMonth() === month) {
+            setStyle(div, { "view-transition-name": dateStr2(i) });
+            div.classList.add("calendar_month");
+        } else {
+            div.innerText = "";
+        }
+        if (
+            i.getDate() === today.getDate() &&
+            i.getMonth() === today.getMonth() &&
+            i.getFullYear() === today.getFullYear()
+        ) {
+            div.classList.add("calendar_today");
+        }
+        pel.append(div);
+    }
+    return pel;
+}
+
+function yearView(date: Date) {
+    const year = date.getFullYear();
+    const div = el("el", { class: "year_view" });
+    for (let m = 0; m < 12; m++) {
+        const title = new Intl.DateTimeFormat(lan, {
+            month: "long",
+        }).format(new Date(`${year}-${m + 1}-1`));
+        div.append(el("div", el("h2", title), monthView(year, m, 1)));
+    }
+    return div;
+}
+
+const titleEl = el("div", { class: "title" });
+
+function setCalView(type: "5" | "month" | "year") {
+    // @ts-ignore
+    if (!document.startViewTransition) {
+        run();
+        return;
+    }
+    // @ts-ignore
+    document.startViewTransition(() => {
+        run();
+    });
+
+    function run() {
+        cal.innerHTML = "";
+        let title = "";
+        if (type === "5") {
+            cal.append(daysView(new Date(), 2));
+            title = new Intl.DateTimeFormat(lan, {
+                year: "numeric",
+                month: "long",
+            }).format(new Date());
+        }
+        if (type === "month") {
+            cal.append(monthView(new Date().getFullYear(), new Date().getMonth(), 1));
+            title = new Intl.DateTimeFormat(lan, {
+                year: "numeric",
+                month: "long",
+            }).format(new Date());
+        }
+        if (type === "year") {
+            cal.append(yearView(new Date()));
+            title = new Intl.DateTimeFormat(lan, {
+                year: "numeric",
+            }).format(new Date());
+        }
+        titleEl.innerText = title;
+    }
 }
 
 async function setTimeLine(centerDate: Date, partLen: number) {
@@ -350,6 +453,28 @@ function todo() {
     dialogX(dialog);
 }
 
+const l = el("div", { popover: "auto", class: "view_popover", onclick: () => l.hidePopover() }, [
+    el("div", "5天视图", {
+        onclick: () => {
+            setCalView("5");
+        },
+    }),
+    el("div", "月视图", {
+        onclick: () => {
+            setCalView("month");
+        },
+    }),
+    el("div", "年视图", {
+        onclick: () => {
+            setCalView("year");
+        },
+    }),
+]);
+
+document.body.append(
+    el("div", { class: "top_bar" }, titleEl, el("button", iconEl(view_svg), { onclick: () => l.showPopover() }), l)
+);
+
 document.body.append(cal, timeLine);
 document.body.append(
     el("div", { class: "button_bar" }, [
@@ -358,7 +483,7 @@ document.body.append(
     ])
 );
 
-setCalView("");
+setCalView("month");
 setTimeLine(new Date(), 2);
 
 setPointer();
