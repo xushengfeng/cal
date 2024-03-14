@@ -549,7 +549,7 @@ async function add(id: string) {
             onclick: async () => {
                 dialog.close();
                 let event: Event = {
-                    name: name.value,
+                    name: name.value || "未命名事件",
                     start: startDate.value ? new Date(startDate.value) : null,
                     end: endDate.value ? new Date(endDate.value) : null,
                     note: note.value,
