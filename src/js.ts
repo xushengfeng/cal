@@ -206,7 +206,8 @@ function monthView(year: number, month: number, date: number) {
     const today = new Date();
     let dateList: Date[] = [];
     let nowDate = new Date(year, month, 1);
-    while (nowDate.getDay() != 0) {
+    const startDay = 0;
+    while (nowDate.getDay() != startDay) {
         nowDate = new Date(nowDate.getTime() - dayTime);
         dateList.unshift(nowDate);
     }
@@ -221,7 +222,15 @@ function monthView(year: number, month: number, date: number) {
         dateList.push(nowDate);
     }
     let pel = el("div", { class: "month_view", style: { "view-transition-name": `a${year}${month}` } });
-    let dayList = ["日", "一", "二", "三", "四", "五", "六"];
+    let dayList: string[] = [];
+    for (let i = 0; i < 7; i++) {
+        const d = dateList[i];
+        dayList.push(
+            new Intl.DateTimeFormat(lan, {
+                weekday: "narrow",
+            }).format(d)
+        );
+    }
     for (let i of dayList) {
         let div = el("div");
         div.innerText = `${i}`;
