@@ -1,6 +1,6 @@
 {
-    "name": "rmbw2",
-    "short_name": "rmbw2",
+    "name": "cal",
+    "short_name": "cal",
     "display": "minimal-ui",
     "start_url": "/",
     "scope": "/",

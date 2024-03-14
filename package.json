@@ -1,5 +1,5 @@
 {
-    "name": "rmbw2",
+    "name": "cal",
     "author": {
         "email": "xushengfeng_zg@163.com",
         "name": "xsf"
@@ -12,7 +12,7 @@
         "preview": "vite preview"
     },
     "version": "0.0.1",
-    "homepage": "https://github.com/xushengfeng/rmbw2/",
+    "homepage": "https://github.com/xushengfeng/cal/",
     "license": "GPL-3.0",
     "dependencies": {
         "@oddbird/popover-polyfill": "^0.3.7",
