@@ -64,6 +64,7 @@ var eventV = localforage.createInstance({
 
 type Event = {
     start: Date;
+    duration?: number;
     end: Date;
     name: string;
     note: string;
@@ -368,9 +369,21 @@ function setPointer() {
     }
 }
 
+function time2str(date: Date) {
+    if (!date) return "";
+    return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+}
+function time2str2(num: number) {
+    if (!num) return "";
+    const date = new Date(num);
+    return `${date.getUTCHours().toString().padStart(2, "0")}:${date.getUTCMinutes().toString().padStart(2, "0")}`;
+}
+function timeStr2num(time: string) {
+    return new Date(`1970-01-01T${time}Z`).getTime();
+}
 function date2str(date: Date) {
     if (!date) return "";
-    return `${dateStr(date)}T${date.getHours()}:${date.getMinutes()}:00`;
+    return `${dateStr(date)}T${time2str(date)}`;
 }
 
 async function add(id: string) {
@@ -382,10 +395,29 @@ async function add(id: string) {
         value: date2str(oldE?.start) || "",
         type: "datetime-local",
     });
+    const duration = el("input", {
+        value: time2str2(oldE?.duration) || "",
+        type: "time",
+    });
     const endDate = el("input", {
         value: date2str(oldE?.end) || "",
         type: "datetime-local",
     });
+    startDate.oninput = () => {
+        if (duration.value) {
+            endDate.value = date2str(new Date(new Date(startDate.value).getTime() + timeStr2num(duration.value)));
+        }
+    };
+    endDate.oninput = () => {
+        if (duration.value) {
+            startDate.value = date2str(new Date(new Date(endDate.value).getTime() - timeStr2num(duration.value)));
+        }
+    };
+    duration.oninput = () => {
+        if (startDate.value) {
+            endDate.value = date2str(new Date(new Date(startDate.value).getTime() + timeStr2num(duration.value)));
+        }
+    };
     const note = el("textarea", { placeholder: "备注", value: oldE?.note || "" });
     const ok = el(
         "button",
@@ -398,9 +430,11 @@ async function add(id: string) {
                     end: endDate.value ? new Date(endDate.value) : null,
                     note: note.value,
                 };
+                if (duration) event.duration = timeStr2num(duration.value);
                 if (!startDate.value) {
                     todos.push({ event });
                     writeTodos();
+                    if (oldE) rmEl.click();
                 } else {
                     if (!endDate.value) {
                         event.end = new Date(new Date(startDate.value).getTime() + 1000 * 60 * 5);
@@ -447,6 +481,8 @@ async function add(id: string) {
             })
         ),
         el("br"),
+        el("label", "持续时间", duration),
+        el("br"),
         el("label", "结束时间", endDate),
         el("br"),
         note,
@@ -473,7 +509,7 @@ function todo() {
                             const event = structuredClone(i.event);
                             event.start = selectDate;
                             if (!event.end) {
-                                event.end = new Date(selectDate.getTime() + 1000 * 60 * 5);
+                                event.end = new Date(selectDate.getTime() + (event.duration || 1000 * 60 * 5));
                             }
                             await setEvent(uuid(), event);
                             setTimeLine(selectDate, 3);
@@ -490,6 +526,11 @@ function todo() {
                         },
                     },
                     i.event.name
+                ),
+                el(
+                    "span",
+                    { class: "todo_spend" },
+                    time2str2(i.event.duration ?? i.event.end?.getTime() - i.event.start?.getTime())
                 ),
                 el("label", fixedEl, iconEl(fixed_svg)),
             ])
