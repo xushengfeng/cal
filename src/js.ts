@@ -185,6 +185,7 @@ const dayEl = (date: Date) => {
 };
 
 function dateStr(date: Date) {
+    if (!date) return "";
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date
         .getDate()
         .toString()
@@ -208,15 +209,21 @@ function dateZ(date: Date) {
 const dayTime = 24 * 60 * 60 * 1000;
 
 const dayEl2 = async (date: Date) => {
-    const div = el("div", { "data-date": dateStr(date), style: { "view-transition-name": dateStr2(date, "b") } });
+    const datestr = dateStr(date);
+    const div = el("div", { "data-date": datestr, style: { "view-transition-name": dateStr2(date, "b") } });
     for (let i = 0; i < 24; i++) {
         div.append(el("div"));
     }
     const start = dateZ(date);
     const end = new Date(start.getTime() + dayTime);
-    const eventsId = day2events?.[dateStr(date)] || [];
+    const eventsId = day2events?.[datestr] || [];
     for (let id of eventsId) {
         const e = await getEvent(id);
+        if (!e) {
+            day2events[datestr] = day2events[datestr].filter((i) => i !== id);
+            writeD2E();
+            continue;
+        }
         let eStart = e.start;
         let eEnd = e.end;
         if (eStart.getTime() < start.getTime()) {
