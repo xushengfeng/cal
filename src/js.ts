@@ -725,6 +725,24 @@ function updateSub() {
 document.body.append(settingEl);
 settingEl.append(subEl);
 
+settingEl.append(
+    el("div", [
+        el("h2", "关于"),
+        el("button", "更新", {
+            onclick: async () => {
+                const cacheKeepList = ["v2"];
+                const keyList = await caches.keys();
+                const cachesToDelete = keyList.filter((key) => !cacheKeepList.includes(key));
+                await Promise.all(
+                    cachesToDelete.map(async (key) => {
+                        await caches.delete(key);
+                    })
+                );
+            },
+        }),
+    ])
+);
+
 updateSub();
 
 document.body.append(
