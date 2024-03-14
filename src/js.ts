@@ -196,6 +196,9 @@ function dateStr2(date: Date, mark?: string) {
         .toString()
         .padStart(2, "0")}`;
 }
+function weekdayStr(m: number, n: string) {
+    return `w${m}${n}`;
+}
 
 // 当天0点
 function dateZ(date: Date) {
@@ -258,9 +261,23 @@ function daysView(centerDate: Date, partLen: number) {
             el(
                 "div",
                 dayEl(d),
-                new Intl.DateTimeFormat(lan, {
-                    weekday: "short",
-                }).format(d),
+
+                el(
+                    "span",
+                    new Intl.DateTimeFormat(lan, {
+                        weekday: "short",
+                    }).format(d),
+                    {
+                        style: {
+                            "view-transition-name": weekdayStr(
+                                centerDate.getMonth(),
+                                new Intl.DateTimeFormat(lan, {
+                                    weekday: "narrow",
+                                }).format(d)
+                            ),
+                        },
+                    }
+                ),
                 {
                     onclick: () => {
                         selectDate = d;
@@ -322,7 +339,7 @@ function monthView(year: number, month: number, isYear?: boolean) {
         nowDate = new Date(nowDate.getTime() + dayTime);
         dateList.push(nowDate);
     }
-    let pel = el("div", { class: "month_view", style: { "view-transition-name": `a${year}${month}` } });
+    let pel = el("div", { class: "month_view" });
     let dayList: string[] = [];
     for (let i = 0; i < 7; i++) {
         const d = dateList[i];
@@ -333,7 +350,8 @@ function monthView(year: number, month: number, isYear?: boolean) {
         );
     }
     for (let i of dayList) {
-        let div = el("div");
+        let div = el("div", { "view-transition-name": weekdayStr(month, i) });
+        if (selectDate.getMonth() === month) setStyle(div, { "view-transition-name": weekdayStr(month, i) });
         div.innerText = `${i}`;
         div.classList.add("calendar_week");
         pel.append(div);
@@ -347,13 +365,21 @@ function monthView(year: number, month: number, isYear?: boolean) {
             if (!isYear) {
                 // @ts-ignore
                 document?.startViewTransition();
+            } else {
+                cal.querySelectorAll("day").forEach((el: HTMLElement) => {
+                    setStyle(el, { "view-transition-name": "" });
+                });
+                pel.querySelectorAll("div").forEach((el) => {
+                    setStyle(el, { "view-transition-name": el.getAttribute("view-transition-name") });
+                });
             }
             setTimeLine(selectDate, 2);
         };
         div.append(el("span", i.getDate()));
         if (!isYear) div.append(el("span", getOtherDay(i, "zh-CN-u-ca-chinese")));
         if (i.getMonth() === month) {
-            setStyle(div, { "view-transition-name": dateStr2(i) });
+            div.setAttribute("view-transition-name", dateStr(i));
+            if (selectDate.getMonth() === month) setStyle(div, { "view-transition-name": dateStr2(i) });
             div.classList.add("calendar_month");
         } else {
             div.innerText = "";
