@@ -15,6 +15,7 @@ import add_svg from "../assets/icons/add.svg";
 import clear_svg from "../assets/icons/clear.svg";
 import fixed_svg from "../assets/icons/fixed.svg";
 import view_svg from "../assets/icons/view.svg";
+import setting_svg from "../assets/icons/setting.svg";
 
 function icon(src: string) {
     return `<img src="${src}" class="icon">`;
@@ -93,6 +94,11 @@ const submit: {
 }[] = (await setting.getItem("calendars")) || [];
 var subCalendar = localforage.createInstance({
     name: "calendar",
+    storeName: "calendars",
+});
+var subCalendar2 = localforage.createInstance({
+    name: "calendar",
+    storeName: "day2events",
 });
 
 function getDateRangeStr(from: Date, to: Date) {
@@ -634,8 +640,61 @@ const l = el("div", { popover: "auto", class: "view_popover", onclick: () => l.h
     }),
 ]);
 
+const settingEl = el("div", { popover: "auto" });
+
+const subEl = el("div");
+
+function subItem(i: (typeof submit)[0]) {
+    return el("div", el("span", i.title));
+}
+
+function updateSub() {
+    subEl.innerHTML = "";
+    for (const i of submit) {
+        subEl.append(subItem(i));
+    }
+    const uploadIcs = el("input", { type: "file" });
+    subEl.append(el("div", el("label", uploadIcs, "上传")));
+    uploadIcs.onchange = () => {
+        const file = uploadIcs.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const text = reader.result?.toString();
+            if (!text) return;
+            const ics = icsParser(text);
+            const id = uuid();
+            const title = ics.find((i) => i.keys[0] === "X-WR-CALNAME").value as string;
+            for (let i of ics) {
+                if (typeof i.value !== "string") {
+                    const start = i.value.find((i) => i.keys[0] === "DTSTART");
+                    const end = i.value.find((i) => i.keys[0] === "DTEND");
+                    // 计算日期
+
+                    let map = { calId: id, id: i.value.find((i) => i.keys[0] === "UID") };
+                }
+            }
+            subCalendar.setItem(id, ics);
+            updateSub();
+        };
+    };
+}
+document.body.append(settingEl);
+settingEl.append(subEl);
+
+updateSub();
+
 document.body.append(
-    el("div", { class: "top_bar" }, titleEl, el("button", iconEl(view_svg), { onclick: () => l.showPopover() }), l)
+    el(
+        "div",
+        { class: "top_bar" },
+        titleEl,
+        el("button", iconEl(view_svg), { onclick: () => l.showPopover() }),
+        l,
+        el("button", iconEl(setting_svg), {
+            onclick: () => settingEl.showPopover(),
+        })
+    )
 );
 
 document.body.append(cal, timeLine);
