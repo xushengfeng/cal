@@ -131,7 +131,10 @@ const dayEl = (date: Date) => {
 };
 
 function dateStr(date: Date) {
-    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date
+        .getDate()
+        .toString()
+        .padStart(2, "0")}`;
 }
 function dateStr2(date: Date, mark?: string) {
     return `${mark || "a"}${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, "0")}${date
@@ -365,8 +368,9 @@ function setPointer() {
     }
 }
 
-function date2iso(date: Date) {
-    return date?.toISOString()?.replace(/:\d{2}\.\d{3}Z/, "");
+function date2str(date: Date) {
+    if (!date) return "";
+    return `${dateStr(date)}T${date.getHours()}:${date.getMinutes()}:00`;
 }
 
 async function add(id: string) {
@@ -375,11 +379,11 @@ async function add(id: string) {
     const dialog = el("dialog", { class: "add" }) as HTMLDialogElement;
     const name = el("input", { placeholder: "日程标题", value: oldE?.name || "" });
     const startDate = el("input", {
-        value: date2iso(oldE?.start) || "",
+        value: date2str(oldE?.start) || "",
         type: "datetime-local",
     });
     const endDate = el("input", {
-        value: date2iso(oldE?.end) || "",
+        value: date2str(oldE?.end) || "",
         type: "datetime-local",
     });
     const note = el("textarea", { placeholder: "备注", value: oldE?.note || "" });
@@ -432,7 +436,16 @@ async function add(id: string) {
         el("h1", title),
         name,
         el("br"),
-        el("label", "开始时间", startDate),
+        el(
+            "label",
+            "开始时间",
+            startDate,
+            el("button", "现在", {
+                onclick: () => {
+                    startDate.value = date2str(new Date());
+                },
+            })
+        ),
         el("br"),
         el("label", "结束时间", endDate),
         el("br"),
