@@ -193,10 +193,20 @@ function daysView(centerDate: Date, partLen: number) {
     const div = el("div", { class: "day_view" });
     for (let d of timeList) {
         div.append(
-            dayEl(d),
-            new Intl.DateTimeFormat(lan, {
-                weekday: "short",
-            }).format(d)
+            el(
+                "div",
+                dayEl(d),
+                new Intl.DateTimeFormat(lan, {
+                    weekday: "short",
+                }).format(d),
+                {
+                    onclick: () => {
+                        selectDate = d;
+                        setCalView("5");
+                        setTimeLine(selectDate, 2);
+                    },
+                }
+            )
         );
     }
     return div;
@@ -239,6 +249,12 @@ function monthView(year: number, month: number, date: number) {
     }
     for (let i of dateList) {
         let div = el("div", { class: "day" });
+        div.onclick = () => {
+            selectDate = i;
+            cal.querySelector(".calendar_select").classList.remove("calendar_select");
+            div.classList.add("calendar_select");
+            setTimeLine(selectDate, 2);
+        };
         div.innerText = `${i.getDate()}`;
         if (i.getMonth() === month) {
             setStyle(div, { "view-transition-name": dateStr2(i) });
@@ -246,12 +262,12 @@ function monthView(year: number, month: number, date: number) {
         } else {
             div.innerText = "";
         }
-        if (
-            i.getDate() === today.getDate() &&
-            i.getMonth() === today.getMonth() &&
-            i.getFullYear() === today.getFullYear()
-        ) {
+        if (dateStr2(i) === dateStr2(today)) {
             div.classList.add("calendar_today");
+        }
+        if (dateStr(i) === dateStr(selectDate)) {
+            cal.querySelector(".calendar_select")?.classList?.remove("calendar_select");
+            div.classList.add("calendar_select");
         }
         pel.append(div);
     }
@@ -287,24 +303,24 @@ function setCalView(type: "5" | "month" | "year") {
         cal.innerHTML = "";
         let title = "";
         if (type === "5") {
-            cal.append(daysView(new Date(), 2));
+            cal.append(daysView(selectDate, 2));
             title = new Intl.DateTimeFormat(lan, {
                 year: "numeric",
                 month: "long",
-            }).format(new Date());
+            }).format(selectDate);
         }
         if (type === "month") {
-            cal.append(monthView(new Date().getFullYear(), new Date().getMonth(), 1));
+            cal.append(monthView(selectDate.getFullYear(), selectDate.getMonth(), 1));
             title = new Intl.DateTimeFormat(lan, {
                 year: "numeric",
                 month: "long",
-            }).format(new Date());
+            }).format(selectDate);
         }
         if (type === "year") {
-            cal.append(yearView(new Date()));
+            cal.append(yearView(selectDate));
             title = new Intl.DateTimeFormat(lan, {
                 year: "numeric",
-            }).format(new Date());
+            }).format(selectDate);
         }
         titleEl.innerText = title;
     }
@@ -382,7 +398,7 @@ async function add(id: string) {
                         event.end = new Date(new Date(startDate.value).getTime() + 1000 * 60 * 5);
                     }
                     await setEvent(id, event);
-                    setTimeLine(new Date(), 3);
+                    setTimeLine(new Date(startDate.value), 3);
                 }
             },
         },
@@ -403,7 +419,7 @@ async function add(id: string) {
             onclick: async () => {
                 dialog.close();
                 await rmEvent(id);
-                setTimeLine(new Date(), 3);
+                setTimeLine(selectDate, 3);
             },
         },
         iconEl(clear_svg)
@@ -438,12 +454,12 @@ function todo() {
                         onclick: async () => {
                             dialog.close();
                             const event = structuredClone(i.event);
-                            event.start = new Date();
+                            event.start = selectDate;
                             if (!event.end) {
-                                event.end = new Date(new Date().getTime() + 1000 * 60 * 5);
+                                event.end = new Date(selectDate.getTime() + 1000 * 60 * 5);
                             }
                             await setEvent(uuid(), event);
-                            setTimeLine(new Date(), 3);
+                            setTimeLine(selectDate, 3);
                             if (!i.fixed) {
                                 todos = todos.filter((e) => e !== i);
                                 writeTodos();
@@ -497,8 +513,10 @@ document.body.append(
     ])
 );
 
+let selectDate = new Date();
+
 setCalView("month");
-setTimeLine(new Date(), 2);
+setTimeLine(selectDate, 2);
 
 setPointer();
 

@@ -238,6 +238,11 @@ body {
     }
     & .calendar_today {
         border: #000 solid 1px;
+        background: var(--color);
+        color: var(--bg);
+    }
+    & .calendar_select {
+        border: #000 solid 1px;
     }
 }
 .year_view {
