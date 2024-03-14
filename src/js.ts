@@ -601,6 +601,7 @@ async function add(id: string) {
             el("button", "现在", {
                 onclick: () => {
                     startDate.value = date2str(new Date());
+                    startDate.dispatchEvent(new Event("input"));
                 },
             })
         ),
@@ -614,6 +615,7 @@ async function add(id: string) {
             el("button", "现在", {
                 onclick: () => {
                     endDate.value = date2str(new Date());
+                    endDate.dispatchEvent(new Event("input"));
                 },
             })
         ),
