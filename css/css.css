@@ -70,6 +70,11 @@ body {
     color: var(--color);
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+}
+
 .icon {
     position: absolute;
     pointer-events: none;
@@ -268,7 +273,6 @@ body {
 .timeline {
     background: var(--bg);
     overflow-y: scroll;
-    height: calc(100vh - 32px);
     display: flex;
     view-transition-name: timeline;
 }
