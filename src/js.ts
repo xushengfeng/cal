@@ -216,6 +216,35 @@ function daysView(centerDate: Date, partLen: number) {
     return div;
 }
 
+function chineseDay(d: string) {
+    d = d
+        .replace("日", "")
+        .padStart(2, "0")
+        .replace(/(\w)(\w)/, (str, a, b) => {
+            return (
+                ["初", "十", "廿", "卅"][parseInt(a)] +
+                ["十", "一", "二", "三", "四", "五", "六", "七", "八", "九"][parseInt(b)]
+            );
+        });
+    let m = { 十十: "初十", 廿十: "二十", 卅十: "三十" };
+    if (m[d]) d = m[d];
+    return d;
+}
+
+function getOtherDay(date: Date, name: string) {
+    let d = new Intl.DateTimeFormat(name, {
+        day: "numeric",
+    }).format(date);
+    if (name === "zh-CN-u-ca-chinese") {
+        d = chineseDay(d);
+        if (d === "初一")
+            d = new Intl.DateTimeFormat(name, {
+                month: "short",
+            }).format(date);
+    }
+    return d;
+}
+
 function monthView(year: number, month: number, isYear?: boolean) {
     const today = new Date();
     let dateList: Date[] = [];
@@ -263,7 +292,8 @@ function monthView(year: number, month: number, isYear?: boolean) {
             }
             setTimeLine(selectDate, 2);
         };
-        div.innerText = `${i.getDate()}`;
+        div.append(el("span", i.getDate()));
+        if (!isYear) div.append(el("span", getOtherDay(i, "zh-CN-u-ca-chinese")));
         if (i.getMonth() === month) {
             setStyle(div, { "view-transition-name": dateStr2(i) });
             div.classList.add("calendar_month");
