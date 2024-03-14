@@ -195,6 +195,11 @@ function dateStr2(date: Date, mark?: string) {
         .padStart(2, "0")}`;
 }
 
+// 当天0点
+function dateZ(date: Date) {
+    return new Date(dateStr(date).replaceAll("-", "/"));
+}
+
 const dayTime = 24 * 60 * 60 * 1000;
 
 const dayEl2 = async (date: Date) => {
@@ -202,7 +207,7 @@ const dayEl2 = async (date: Date) => {
     for (let i = 0; i < 24; i++) {
         div.append(el("div"));
     }
-    const start = new Date(dateStr(date));
+    const start = dateZ(date);
     const end = new Date(start.getTime() + dayTime);
     const eventsId = day2events?.[dateStr(date)] || [];
     for (let id of eventsId) {
@@ -434,7 +439,7 @@ async function setTimeLine(centerDate: Date, partLen: number) {
 function setPointer() {
     const now = new Date();
     let todayEl = timeLine.querySelector(`[data-date="${dateStr(now)}"]`);
-    const deltaT = now.getTime() - new Date(dateStr(now)).getTime();
+    const deltaT = now.getTime() - dateZ(now).getTime();
     const top = deltaT / dayTime;
     if (todayEl) {
         let pointer = todayEl.querySelector(".pointer") as HTMLElement;
