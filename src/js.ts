@@ -510,6 +510,14 @@ function date2str(date: Date) {
     return `${dateStr(date)}T${time2str(date)}`;
 }
 
+function fixTime(e: Event) {
+    if (!e.start || !e.end) return e;
+    if (e.end.getTime() <= e.start.getTime()) {
+        e.end = new Date(e.end.getTime() + 1000 * 60 * 5);
+    }
+    return e;
+}
+
 async function add(id: string) {
     const oldE = await getEvent(id);
     const title = oldE ? "更改" : "新增";
@@ -569,6 +577,7 @@ async function add(id: string) {
                     end: endDate.value ? new Date(endDate.value) : null,
                     note: note.value,
                 };
+                event = fixTime(event);
                 if (duration && durationLock.checked) event.duration = timeStr2num(duration.value);
                 if (!startDate.value) {
                     todos.push({ event });
@@ -656,11 +665,12 @@ function todo() {
                     {
                         onclick: async () => {
                             dialog.close();
-                            const event = structuredClone(i.event);
+                            let event = structuredClone(i.event);
                             event.start = selectDate;
                             event.start.setHours(new Date().getHours());
                             event.start.setMinutes(new Date().getMinutes());
                             event.start.setSeconds(0);
+                            event = fixTime(event);
                             if (!event.end) {
                                 event.end = new Date(selectDate.getTime() + (event.duration || 1000 * 60 * 5));
                             }
