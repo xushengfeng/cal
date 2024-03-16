@@ -519,28 +519,43 @@ async function add(id: string) {
         value: date2str(oldE?.start) || "",
         type: "datetime-local",
     });
+    const d2 = time2str2(oldE?.end?.getTime() - oldE?.start?.getTime());
     const duration = el("input", {
-        value: time2str2(oldE?.duration) || "",
+        value: time2str2(oldE?.duration) || d2 || "",
+        disabled: !Boolean(oldE?.duration),
         type: "time",
+    });
+    const durationLock = el("input", {
+        checked: Boolean(oldE?.duration),
+        type: "checkbox",
     });
     const endDate = el("input", {
         value: date2str(oldE?.end) || "",
         type: "datetime-local",
     });
     startDate.oninput = () => {
-        if (duration.value) {
+        if (duration.value && durationLock.checked) {
             endDate.value = date2str(new Date(new Date(startDate.value).getTime() + timeStr2num(duration.value)));
+        }
+        if (!durationLock.checked) {
+            duration.value = time2str2(new Date(endDate.value).getTime() - new Date(startDate.value).getTime());
         }
     };
     endDate.oninput = () => {
-        if (duration.value) {
+        if (duration.value && durationLock.checked) {
             startDate.value = date2str(new Date(new Date(endDate.value).getTime() - timeStr2num(duration.value)));
+        }
+        if (!durationLock.checked) {
+            duration.value = time2str2(new Date(endDate.value).getTime() - new Date(startDate.value).getTime());
         }
     };
     duration.oninput = () => {
         if (startDate.value) {
             endDate.value = date2str(new Date(new Date(startDate.value).getTime() + timeStr2num(duration.value)));
         }
+    };
+    durationLock.oninput = () => {
+        duration.disabled = !durationLock.checked;
     };
     const note = el("textarea", { placeholder: "备注", value: oldE?.note || "" });
     const ok = el(
@@ -554,7 +569,7 @@ async function add(id: string) {
                     end: endDate.value ? new Date(endDate.value) : null,
                     note: note.value,
                 };
-                if (duration) event.duration = timeStr2num(duration.value);
+                if (duration && durationLock.checked) event.duration = timeStr2num(duration.value);
                 if (!startDate.value) {
                     todos.push({ event });
                     writeTodos();
@@ -606,7 +621,7 @@ async function add(id: string) {
             })
         ),
         el("br"),
-        el("label", "持续时间", duration),
+        el("span", el("label", "持续时间", duration), el("label", "锁定", durationLock)),
         el("br"),
         el(
             "label",
